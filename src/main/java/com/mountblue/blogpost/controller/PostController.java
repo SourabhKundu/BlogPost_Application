@@ -113,7 +113,6 @@ public class PostController {
 
         Post post = new Post();
         User user = userServiceImpl.getCurrentUser();
-        int authorId = Math.toIntExact(user.getId());
 
         post.setTitle(title);
         post.setContent(content);
@@ -123,7 +122,7 @@ public class PostController {
         post.setUpdatedAt(time);
         post.setExcerpt(content.substring(0));
         post.setIsPublished(true);
-        post.setAuthorId(authorId);
+        post.setAuthorId(user.getId());
 
         String[] tagsArray = tags.split(" ");
         List<Tag> tagList = new ArrayList<Tag>();

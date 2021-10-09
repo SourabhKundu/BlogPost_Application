@@ -37,7 +37,7 @@ public class Post {
     private Timestamp updatedAt;
 
     @Column(name = "authorId")
-    private int authorId;
+    private Long authorId;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "post_tags",
@@ -45,11 +45,11 @@ public class Post {
             inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
     private List<Tag> tags;
 
-    public int getAuthorId() {
+    public Long getAuthorId() {
         return authorId;
     }
 
-    public void setAuthorId(int authorId) {
+    public void setAuthorId(Long authorId) {
         this.authorId = authorId;
     }
 
