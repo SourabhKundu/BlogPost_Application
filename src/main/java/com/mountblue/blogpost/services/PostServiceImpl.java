@@ -29,7 +29,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void savePost(Post post) {
-        postRepository.save(post);
+        this.postRepository.save(post);
     }
 
     @Override
