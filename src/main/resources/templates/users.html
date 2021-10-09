@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+  padding: 3rem;
+}
+      .grid-container {
+  border: 1px solid black;
+  width: 450px;
+  margin :20px;
+  padding: 10px;
+}
+
+.postContainer{
+width : 100%;
+padding: 20px;
+display: grid;
+  grid-template-columns: auto auto auto ;
+}
+.postContainer a{
+    color: inherit;
+  text-decoration: inherit;
+}
+
+    </style>
+</head>
+<body>
+<div>
+    <h2>Blog Posts</h2>
+</div>
+<div>
+    <th:block th:if="${admin} OR ${sessionUser}">
+        <form action="/newPost" method="get">
+            <input type="submit" name="newPost" value="New Post">
+        </form>
+    </th:block>
+</div>
+<div>
+    <form action="/signup" method="get">
+        <input type="submit" name="signUp" value="SignUp">
+    </form>
+</div>
+<th:block th:if="${admin} OR ${sessionUser}">
+    <div class="row col-sm-1"><span sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a></span></div>
+    <div th:if="${param.logout}">
+        <div class="alert alert-info">You have been logged out.</div>
+    </div>
+</th:block>
+<div>
+    <form th:action="@{/search}">
+        <input type="text" name="searchBox" placeholder="Search here"/>
+        <input type="submit" name="search" value="Search"/>
+    </form>
+</div>
+
+<form action="/filter" method="get" >
+    <div>
+        <h5>By Author: </h5>
+        <th:block th:each="user: ${users}">
+            <div th:object="${user}">
+                <input type="checkbox" name="authorId" th:value="${user.id}" />
+                <label>[[${user.name}]]</label>
+            </div>
+        </th:block>
+    </div>
+    <div class="">
+        <h5>By Tags: </h5>
+        <th:block th:each="tag: ${tags}">
+            <div th:object="${tag}">
+                <input type="checkbox" name="tagId" th:value="${tag.id}" />
+                <label>[[${tag.name}]]</label>
+            </div>
+        </th:block>
+    </div>
+    <input type="submit" value="Apply Changes" />
+</form>
+
+<a th:href="@{'/page/' + ${currentPage} + '?sortField=publishedAt&sortDirection=' + ${reverseSortDirection}}">
+    Sort
+</a>
+
+<div class="postContainer">
+    <th:block th:each="user : ${posts}">
+
+        <div class="grid-container"><a th:href="@{'/post/'+${user.id}}"><input type="hidden" name="id"
+                                                                               value="${user.id}">
+            [[${user.id}]]<br> [[${user.excerpt}]] <br>[[${user.title}]]
+        </a>
+
+
+        </div>
+
+    </th:block>
+</div>
+
+</div>
+<div th:if="${totalPage} > 1">
+    <div class="row col-sm-10">
+        <div class="col-sm-1">
+            <a th:if="${currentPage-1 >= 1}" th:href="@{'/page/' + ${currentPage - 1}+${keyword != null ? '?keyword='
+            + keyword : ''} }">Previous</a>
+            <span th:unless="${currentPage-1 >= 1}">Previous</span>
+        </div>
+
+        <div class="col-sm-1">
+					<span th:each="i: ${#numbers.sequence(1, totalPage)}">
+						<a th:if="${currentPage != i}" th:href="@{'/page/' + ${i}+${keyword != null ? '?keyword='
+						+ keyword : ''}}">[[${i}]]
+                        </a>
+						<span th:unless="${currentPage != i}">[[${i}]]</span>  &nbsp; &nbsp;
+					</span>
+        </div>
+        <div class="col-sm-1">
+            <a th:if="${currentPage < totalPage}" th:href="@{'/page/' + ${currentPage + 1}
+            +${keyword != null ? '?keyword=' + keyword : ''}}">Next</a>
+            <!--            <input type="hidden" name="start" value="1"/>-->
+            <span th:unless="${currentPage < totalPage}">Next</span>
+        </div>
+    </div>
+</div>
+
+
+<!--+'&sortField='+${sortField}+'&sortDirection='+${sortDirection} &ndash;&gt; number-->
+<!--+'&sortField='+${sortField}+'&sortDirection='+${sortDirection} ->next -->
+<!--+'&sortField='+${sortField}+'&sortDirection='+${sortDirection} -> previous-->
+
+</body>
+</html>
