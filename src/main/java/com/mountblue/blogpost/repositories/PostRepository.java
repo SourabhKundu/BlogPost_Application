@@ -12,7 +12,7 @@ import java.util.List;
 
 
 public interface PostRepository extends JpaRepository<Post,Integer> {
-    @Transactional
+
     @Query("SELECT p.id FROM Post p WHERE p.authorId IN (?1)")
     List<Integer> getPostIdsByAuthorIds(int authorId);
 

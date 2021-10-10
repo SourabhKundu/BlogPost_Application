@@ -195,26 +195,26 @@ public class PostController {
         return "users";
     }
 
-//    @GetMapping("/filter")
-//    public String getFilteredPosts2(@RequestParam("authorId") Integer[] authorId,
-//                                    @RequestParam("tagId") Integer[] tagId,String keyword,
-//                                    Model model) {
-//        List<Integer> tagIds = Arrays.asList(tagId);
-//        List<Integer> authorIds = Arrays.asList(authorId);
-//        List<Integer> postIdByAuthorId = postService.getPostIdByAuthor(authorIds);
-//        List<Integer> postsByTagId = postService.getAllPostIdByTagId(tagIds);
-//
-//        List<Integer> postIds = new ArrayList<>();
-//
-//        for (int postId : postsByTagId) {
-//            if (postIdByAuthorId.contains(postId)) {
-//                postIds.add(postId);
-//            }
-//        }
-//        List<Post> posts = postService.getAllPostsById(postIds);
-//        model.addAttribute("posts", posts);
-//        return showHomePage(keyword, model);
-//    }
+    @GetMapping("/filter")
+    public String getFilteredPosts2(@RequestParam("authorId") Integer[] authorId,
+                                    @RequestParam("tagId") Integer[] tagId,String keyword,
+                                    Model model) {
+        List<Integer> tagIds = Arrays.asList(tagId);
+        List<Integer> authorIds = Arrays.asList(authorId);
+        List<Integer> postIdByAuthorId = postService.getPostIdByAuthor(authorIds);
+        List<Integer> postsByTagId = postService.getAllPostIdByTagId(tagIds);
+
+        List<Integer> postIds = new ArrayList<>();
+
+        for (int postId : postsByTagId) {
+            if (postIdByAuthorId.contains(postId)) {
+                postIds.add(postId);
+            }
+        }
+        List<Post> posts = postService.getAllPostsById(postIds);
+        model.addAttribute("posts", posts);
+        return showHomePage(keyword, model);
+    }
 
     public static boolean hasRole(String roleName) {
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
