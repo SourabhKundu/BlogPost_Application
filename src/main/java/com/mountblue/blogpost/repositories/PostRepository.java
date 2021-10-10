@@ -14,7 +14,7 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post,Integer> {
 
     @Query("SELECT p.id FROM Post p WHERE p.authorId IN (?1)")
-    List<Integer> getPostIdsByAuthorIds(int authorId);
+    List<Integer> getPostIdsByAuthorIds(Long authorId);
 
     @Query("SELECT p FROM Post p WHERE lower(p.title) LIKE %?1%"
             +" OR lower(p.content) LIKE %?1%"

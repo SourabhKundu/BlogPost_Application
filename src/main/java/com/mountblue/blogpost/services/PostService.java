@@ -17,7 +17,7 @@ public interface PostService {
 
     List<Integer> getAllPostIdByTagId(List<Integer> tagIds);
 
-    List<Integer> getPostIdByAuthor(List<Integer> authorIds);
+    List<Integer> getPostIdByAuthor(List<Long> authorIds);
 
     List<Post> getAllPostsById(List<Integer> postIds);
 }

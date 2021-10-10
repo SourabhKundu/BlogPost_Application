@@ -1,8 +1,6 @@
 package com.mountblue.blogpost.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.time.Instant;
 import java.sql.Timestamp;
 
@@ -156,11 +154,9 @@ public class PostController {
         Timestamp time = Timestamp.from(Instant.now());
 
         Post post = postService.getPostById(id);
-        User user = userServiceImpl.getCurrentUser();
 
         post.setTitle(title);
         post.setContent(content);
-        post.setAuthor(user.getName());
         post.setUpdatedAt(time);
         post.setExcerpt(content.substring(0));
 
@@ -186,33 +182,48 @@ public class PostController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("totalPage", page.getTotalPages());
         model.addAttribute("totalItems", page.getTotalElements());
-        model.addAttribute("posts", posts);
+
         model.addAttribute("sortField",sortField);
         model.addAttribute("sortDirection", sortDirection);
         model.addAttribute("reverseSortDirection", sortDirection.equals("asc") ? "desc" : "asc");
         model.addAttribute("currentPage",pageNo);
 
+        if (model.getAttribute("posts") == null){
+            model.addAttribute("posts", posts);
+        }
+
         return "users";
     }
 
     @GetMapping("/filter")
-    public String getFilteredPosts2(@RequestParam("authorId") Integer[] authorId,
-                                    @RequestParam("tagId") Integer[] tagId,String keyword,
-                                    Model model) {
-        List<Integer> tagIds = Arrays.asList(tagId);
-        List<Integer> authorIds = Arrays.asList(authorId);
-        List<Integer> postIdByAuthorId = postService.getPostIdByAuthor(authorIds);
-        List<Integer> postsByTagId = postService.getAllPostIdByTagId(tagIds);
+    public String getFilteredPosts(@RequestParam(value = "authorId",required = false) Optional<Long> authorId,
+                                    @RequestParam(value = "tagId",required = false) Optional<Integer> tagId,
+                                   String keyword, Model model) {
 
-        List<Integer> postIds = new ArrayList<>();
-
-        for (int postId : postsByTagId) {
-            if (postIdByAuthorId.contains(postId)) {
-                postIds.add(postId);
+        if(authorId.isPresent()) {
+            List<Long> authorIds = Collections.singletonList(authorId.get());
+            List<Integer> postIdByAuthorId = postService.getPostIdByAuthor(authorIds);
+            if (tagId.isPresent()) {
+                List<Integer> tagIds = Collections.singletonList(tagId.get());
+                List<Integer> postsByTagId = postService.getAllPostIdByTagId(tagIds);
+                List<Integer> postIds = new ArrayList<>();
+                    for (int postId : postsByTagId) {
+                        if (postIdByAuthorId.contains(postId)) {
+                            postIds.add(postId);
+                        }
+                    }
+                    List<Post> posts = postService.getAllPostsById(postIds);
+                    model.addAttribute("posts", posts);
+                }else {
+                List<Post> posts = postService.getAllPostsById(postIdByAuthorId);
+                model.addAttribute("posts", posts);
             }
+        }else {
+            List<Integer> tagIds = Collections.singletonList(tagId.get());
+            List<Integer> postsByTagId = postService.getAllPostIdByTagId(tagIds);
+            List<Post> posts = postService.getAllPostsById(postsByTagId);
+            model.addAttribute("posts", posts);
         }
-        List<Post> posts = postService.getAllPostsById(postIds);
-        model.addAttribute("posts", posts);
         return showHomePage(keyword, model);
     }
 

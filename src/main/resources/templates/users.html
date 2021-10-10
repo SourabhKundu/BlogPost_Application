@@ -86,18 +86,13 @@ display: grid;
 
 <div class="postContainer">
     <th:block th:each="user : ${posts}">
-
         <div class="grid-container"><a th:href="@{'/post/'+${user.id}}"><input type="hidden" name="id"
                                                                                value="${user.id}">
             [[${user.id}]]<br> [[${user.excerpt}]] <br>[[${user.title}]]
         </a>
-
-
         </div>
-
     </th:block>
 </div>
-
 </div>
 <div th:if="${totalPage} > 1">
     <div class="row col-sm-10">

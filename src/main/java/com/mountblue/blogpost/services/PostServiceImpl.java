@@ -74,9 +74,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Integer> getPostIdByAuthor(List<Integer> authorIds) {
+    public List<Integer> getPostIdByAuthor(List<Long> authorIds) {
         List<Integer> postIds = new ArrayList<>();
-        for(int authorId: authorIds){
+        for(Long authorId: authorIds){
             postIds.addAll(postRepository.getPostIdsByAuthorIds(authorId));
         }
         return postIds;
