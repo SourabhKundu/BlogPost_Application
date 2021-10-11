@@ -1,17 +1,16 @@
 package com.mountblue.blogpost.controller;
 
 import com.mountblue.blogpost.model.Comment;
-import com.mountblue.blogpost.model.Post;
 import com.mountblue.blogpost.model.User;
 import com.mountblue.blogpost.services.CommentService;
+import com.mountblue.blogpost.services.UserService;
 import com.mountblue.blogpost.services.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 
@@ -26,6 +25,16 @@ public class CommentController {
 
     @Autowired
     private UserServiceImpl userServiceImpl;
+
+    @Autowired
+    private UserService userService;
+
+    @ModelAttribute
+    public void modelAttribute(Model model) {
+        model.addAttribute("sessionUser", userService.findUserByEmail(SecurityContextHolder.getContext()
+                .getAuthentication().getName()));
+        model.addAttribute("admin", hasRole("ROLE_ADMIN"));
+    }
 
     @PostMapping("/comment")
     public String saveComment(@RequestParam("comment") String data,
@@ -51,29 +60,33 @@ public class CommentController {
 
     @GetMapping("/deleteComment/{commentId}")
     public String deleteComment(@PathVariable("commentId") int commentId,
+                                @RequestParam("postId") int postId,
                                 Model model){
         this.commentService.deleteCommentByPostId(commentId);
-        return "redirect:/";
+        return postController.showPostByID(postId, model);
     }
 
-//    @PostMapping("/update/{id}")
-//    public String updateComment(@RequestParam("title") String title,
-//                             @PathVariable("id") int id,
-//                             @RequestParam("content") String content,
-////                             @RequestParam("tags") String tags,
-//                             Model model){
-//        Timestamp time = Timestamp.from(Instant.now());
-//
-//        Post post = postService.getPostById(id);
-//        User user = userServiceImpl.getCurrentUser();
-//
-//        post.setTitle(title);
-//        post.setContent(content);
-//        post.setAuthor(user.getName());
-//        post.setUpdatedAt(time);
-//        post.setExcerpt(content.substring(0));
-//
-//        postService.savePost(post);
-//        return "post";
-//    }
+    @GetMapping("/showCommentUpdate/{commentId}")
+    public String showFormForUpdate(@PathVariable(value = "commentId") int id,
+                                    @RequestParam("postId")int postId,Model model) {
+        Comment comment = commentService.getCommentById(id);
+        model.addAttribute("editComment", comment);
+        return postController.showPostByID(postId, model);
+    }
+
+    @PostMapping("/comment/update/{commentId}")
+    public String updatePost(@PathVariable("commentId") int id,
+                             @RequestParam("comment") String comment,
+                             @RequestParam("postId") int postId,
+                             Model model) {
+        Comment commentObj = commentService.getCommentById(id);
+        commentObj.setComment(comment);
+        commentService.saveComment(commentObj);
+        return postController.showPostByID(postId, model);
+    }
+
+    public static boolean hasRole(String roleName) {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(roleName));
+    }
 }

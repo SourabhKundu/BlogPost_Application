@@ -1,8 +1,5 @@
 package com.mountblue.blogpost.model;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import javax.persistence.*;
 import java.sql.Timestamp;
 

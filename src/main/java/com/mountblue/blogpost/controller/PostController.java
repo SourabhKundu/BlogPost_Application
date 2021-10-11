@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.sql.Timestamp;
 
 import com.mountblue.blogpost.model.Tag;
-import com.mountblue.blogpost.controller.web.UserRegistrationDto;
 import com.mountblue.blogpost.model.User;
 import com.mountblue.blogpost.services.*;
 import org.springframework.data.domain.Page;
@@ -44,54 +43,53 @@ public class PostController {
     private CommentService commentService;
 
     @ModelAttribute
-    public void modelAttribute(Model model){
+    public void modelAttribute(Model model) {
         model.addAttribute("sessionUser", userService.findUserByEmail(SecurityContextHolder.getContext()
                 .getAuthentication().getName()));
-
-        model.addAttribute("admin",hasRole("ROLE_ADMIN"));
+        model.addAttribute("admin", hasRole("ROLE_ADMIN"));
     }
 
     @RequestMapping("/search")
-    public String showSearchResult(@RequestParam("searchBox") String keyword, Model model){
+    public String showSearchResult(@RequestParam("keyword") String keyword, Model model) {
         return showHomePage(keyword, model);
     }
 
     @RequestMapping("/")
-    public String showHomePage(String keyword, Model model){
-        return showPagination(1,"title", "desc", keyword , model);
+    public String showHomePage(String keyword, Model model) {
+        return showPagination(1, "title", "desc", keyword, model);
     }
 
     @GetMapping("post/{id}")
-    public String showPostByID(@PathVariable("id") int id, Model model){
+    public String showPostByID(@PathVariable("id") int id, Model model) {
         Post post = postService.getPostById(id);
-        model.addAttribute("post",post);
+        model.addAttribute("post", post);
         List<Comment> comments = commentRepository.getCommentsByPostId(id);
-        model.addAttribute("comments",comments);
+        model.addAttribute("comments", comments);
         User user = userServiceImpl.getCurrentUser();
-        model.addAttribute("user",user);
+        model.addAttribute("user", user);
 
         return "post";
     }
 
     @GetMapping("/edit/{id}")
-    public ModelAndView editPost(@PathVariable(name = "id") Integer id){
+    public ModelAndView editPost(@PathVariable(name = "id") Integer id) {
         ModelAndView editView = new ModelAndView("editPost");
-        if(id != null){
+        if (id != null) {
             Post post = postService.getPostById(id);
             post.setId(id);
-            editView.addObject("post",post);
+            editView.addObject("post", post);
         }
         return editView;
     }
 
     @GetMapping("/deletePost/{id}")
-    public String deletePost(@PathVariable (value = "id") int id){
+    public String deletePost(@PathVariable(value = "id") int id) {
         try {
             postTagService.deleteTagByPostId(id);
             commentService.deleteCommentByPostId(id);
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Unable to delete the post");
-        }finally {
+        } finally {
             postService.deletePostById(id);
         }
         return "redirect:/";
@@ -106,7 +104,7 @@ public class PostController {
     public String savePost(@RequestParam("title") String title,
                            @RequestParam("content") String content,
                            @RequestParam("tags") String tags,
-                           Model model){
+                           Model model) {
         Timestamp time = Timestamp.from(Instant.now());
 
         Post post = new Post();
@@ -124,35 +122,31 @@ public class PostController {
 
         String[] tagsArray = tags.split(" ");
         List<Tag> tagList = new ArrayList<Tag>();
-        for(String tag : tagsArray){
+        for (String tag : tagsArray) {
             Tag tagObject = new Tag();
 
-            if(tagService.checkTagWithName(tag)){
+            if (tagService.checkTagWithName(tag)) {
                 tagList.add(tagService.getTagByName(tag));
-            }else{
+            } else {
                 tagObject.setName(tag);
                 tagObject.setCreatedAt(time);
                 tagObject.setUpdatedAt(time);
                 tagList.add(tagObject);
             }
-            System.out.println(tagList.size());
         }
         post.setTags(tagList);
-
         postService.savePost(post);
-//        tagService.saveAllTags(tagList);
 
-        return "index";
+        return "redirect:/";
     }
 
     @PostMapping("/update/{id}")
     public String updatePost(@RequestParam("title") String title,
                              @PathVariable("id") int id,
                              @RequestParam("content") String content,
-//                             @RequestParam("tags") String tags,
-                             Model model){
+                             @RequestParam("tags") String tags,
+                             Model model) {
         Timestamp time = Timestamp.from(Instant.now());
-
         Post post = postService.getPostById(id);
 
         post.setTitle(title);
@@ -160,8 +154,23 @@ public class PostController {
         post.setUpdatedAt(time);
         post.setExcerpt(content.substring(0));
 
+        String[] tagsArray = tags.split(" ");
+        List<Tag> tagList = new ArrayList<Tag>();
+        for (String tag : tagsArray) {
+            Tag tagObject = new Tag();
+
+            if (tagService.checkTagWithName(tag)) {
+                tagList.add(tagService.getTagByName(tag));
+            } else {
+                tagObject.setName(tag);
+                tagObject.setCreatedAt(time);
+                tagObject.setUpdatedAt(time);
+                tagList.add(tagObject);
+            }
+        }
+        post.setTags(tagList);
         postService.savePost(post);
-        return showPostByID(id,model);
+        return showPostByID(id, model);
     }
 
     @GetMapping("/page/{pageNo}")
@@ -169,26 +178,26 @@ public class PostController {
                                  @RequestParam(value = "sortField", defaultValue = "publishedAt") String sortField,
                                  @RequestParam(value = "sortDirection", defaultValue = "asc") String sortDirection,
                                  String keyword,
-                                 Model model){
+                                 Model model) {
 
         int pageSize = 3;
         List<User> users = userService.getAllUser();
         List<Tag> tags = tagService.getAllTags();
-        Page<Post> page = postService.findPaginated(pageNo, pageSize, sortField, sortDirection,keyword);
+        Page<Post> page = postService.findPaginated(pageNo, pageSize, sortField, sortDirection, keyword);
         List<Post> posts = page.getContent();
 
-        model.addAttribute("users",users);
-        model.addAttribute("tags",tags);
+        model.addAttribute("users", users);
+        model.addAttribute("tags", tags);
         model.addAttribute("keyword", keyword);
         model.addAttribute("totalPage", page.getTotalPages());
         model.addAttribute("totalItems", page.getTotalElements());
 
-        model.addAttribute("sortField",sortField);
+        model.addAttribute("sortField", sortField);
         model.addAttribute("sortDirection", sortDirection);
         model.addAttribute("reverseSortDirection", sortDirection.equals("asc") ? "desc" : "asc");
-        model.addAttribute("currentPage",pageNo);
+        model.addAttribute("currentPage", pageNo);
 
-        if (model.getAttribute("posts") == null){
+        if (model.getAttribute("posts") == null) {
             model.addAttribute("posts", posts);
         }
 
@@ -196,29 +205,29 @@ public class PostController {
     }
 
     @GetMapping("/filter")
-    public String getFilteredPosts(@RequestParam(value = "authorId",required = false) Optional<Long> authorId,
-                                    @RequestParam(value = "tagId",required = false) Optional<Integer> tagId,
+    public String getFilteredPosts(@RequestParam(value = "authorId", required = false) Optional<Long> authorId,
+                                   @RequestParam(value = "tagId", required = false) Optional<Integer> tagId,
                                    String keyword, Model model) {
 
-        if(authorId.isPresent()) {
+        if (authorId.isPresent()) {
             List<Long> authorIds = Collections.singletonList(authorId.get());
             List<Integer> postIdByAuthorId = postService.getPostIdByAuthor(authorIds);
             if (tagId.isPresent()) {
                 List<Integer> tagIds = Collections.singletonList(tagId.get());
                 List<Integer> postsByTagId = postService.getAllPostIdByTagId(tagIds);
                 List<Integer> postIds = new ArrayList<>();
-                    for (int postId : postsByTagId) {
-                        if (postIdByAuthorId.contains(postId)) {
-                            postIds.add(postId);
-                        }
+                for (int postId : postsByTagId) {
+                    if (postIdByAuthorId.contains(postId)) {
+                        postIds.add(postId);
                     }
-                    List<Post> posts = postService.getAllPostsById(postIds);
-                    model.addAttribute("posts", posts);
-                }else {
+                }
+                List<Post> posts = postService.getAllPostsById(postIds);
+                model.addAttribute("posts", posts);
+            } else {
                 List<Post> posts = postService.getAllPostsById(postIdByAuthorId);
                 model.addAttribute("posts", posts);
             }
-        }else {
+        } else {
             List<Integer> tagIds = Collections.singletonList(tagId.get());
             List<Integer> postsByTagId = postService.getAllPostIdByTagId(tagIds);
             List<Post> posts = postService.getAllPostsById(postsByTagId);

@@ -18,7 +18,7 @@ public class Post {
     @Column(name = "excerpt")
     private String excerpt;
 
-    @Column(name = "content", length = 65535)
+    @Column(name = "content",columnDefinition="TEXT")
     private String content;
 
     @Column(name = "author")

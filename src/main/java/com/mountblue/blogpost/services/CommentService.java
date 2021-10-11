@@ -6,4 +6,6 @@ public interface CommentService {
     void saveComment(Comment comment);
 
     void deleteCommentByPostId(int id);
+
+    Comment getCommentById(int id);
 }
