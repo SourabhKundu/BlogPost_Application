@@ -91,6 +91,15 @@ display: grid;
                         </div>
                     </th:block>
                 </div>
+                <div class="row">
+                    <h5>Filter By PublishedAt: </h5>
+                    <th:block th:each="post: ${posts}">
+                        <div th:object="${post}" class="col">
+                            <input type="checkbox" name="publishedAt" th:value="${post.publishedAt}"/>
+                            <label>[[${post.publishedAt}]]</label>
+                        </div>
+                    </th:block>
+                </div>
                 <input type="submit" value="Filter"/>
             </form>
         </div>

@@ -205,15 +205,17 @@ public class PostController {
     }
 
     @GetMapping("/filter")
-    public String getFilteredPosts(@RequestParam(value = "authorId", required = false) Optional<Long> authorId,
-                                   @RequestParam(value = "tagId", required = false) Optional<Integer> tagId,
+    public String getFilteredPosts(@RequestParam(value = "authorId",required = false) Optional<Long[]> authorId,
+                                   @RequestParam(value = "tagId",required = false) Optional<Integer[]> tagId,
+//                                   @RequestParam(value = "publishedAt") Optional<Timestamp> publishedAt,
                                    String keyword, Model model) {
 
+
         if (authorId.isPresent()) {
-            List<Long> authorIds = Collections.singletonList(authorId.get());
+            List<Long[]> authorIds = Collections.singletonList(authorId.get());
             List<Integer> postIdByAuthorId = postService.getPostIdByAuthor(authorIds);
             if (tagId.isPresent()) {
-                List<Integer> tagIds = Collections.singletonList(tagId.get());
+                List<Integer[]> tagIds = Collections.singletonList(tagId.get());
                 List<Integer> postsByTagId = postService.getAllPostIdByTagId(tagIds);
                 List<Integer> postIds = new ArrayList<>();
                 for (int postId : postsByTagId) {
@@ -228,11 +230,16 @@ public class PostController {
                 model.addAttribute("posts", posts);
             }
         } else {
-            List<Integer> tagIds = Collections.singletonList(tagId.get());
+            List<Integer[]> tagIds = Collections.singletonList(tagId.get());
             List<Integer> postsByTagId = postService.getAllPostIdByTagId(tagIds);
             List<Post> posts = postService.getAllPostsById(postsByTagId);
             model.addAttribute("posts", posts);
         }
+//        List<Timestamp> publishedAtList = Collections.singletonList(publishedAt.get());
+//        List<Integer> postsIdByPublishedAt = postService.getAllPostIdByPublishedAt(publishedAtList);
+//        List<Post> posts = postService.getAllPostsById(postsIdByPublishedAt);
+//        model.addAttribute("posts",posts);
+
         return showHomePage(keyword, model);
     }
 

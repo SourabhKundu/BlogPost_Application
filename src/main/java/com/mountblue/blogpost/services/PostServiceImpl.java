@@ -1,5 +1,6 @@
 package com.mountblue.blogpost.services;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -65,18 +66,18 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Integer> getAllPostIdByTagId(List<Integer> tagIds) {
+    public List<Integer> getAllPostIdByTagId(List<Integer[]> tagIds) {
         List<Integer> postId = new ArrayList<>();
-        for(int tagId: tagIds) {
+        for(Integer[] tagId : tagIds) {
             postId.addAll(postTagRepository.getPostIdByTagId(tagId));
         }
         return postId;
     }
 
     @Override
-    public List<Integer> getPostIdByAuthor(List<Long> authorIds) {
+    public List<Integer> getPostIdByAuthor(List<Long[]> authorIds) {
         List<Integer> postIds = new ArrayList<>();
-        for(Long authorId: authorIds){
+        for(Long[] authorId: authorIds){
             postIds.addAll(postRepository.getPostIdsByAuthorIds(authorId));
         }
         return postIds;
@@ -85,6 +86,16 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<Post> getAllPostsById(List<Integer> postIds) {
         return postRepository.findAllById(postIds);
+    }
+
+    @Override
+    public List<Integer> getAllPostIdByPublishedAt(List<Timestamp> publishedAtList) {
+        List<Integer> postIds = new ArrayList<>();
+        for (Timestamp time : publishedAtList){
+            postIds.addAll(postRepository.getPostIdsByPublishedAt(time));
+        }
+
+        return null;
     }
 
 }

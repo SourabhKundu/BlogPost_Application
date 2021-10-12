@@ -14,6 +14,6 @@ public interface PostTagRepository extends JpaRepository<PostTag,Integer> {
     @Query(value = "DELETE FROM post_tags pt WHERE pt.post_id = ?1", nativeQuery = true)
     void deleteTagByPostId(int id);
 
-    @Query(value = "SELECT pt.post_id FROM post_tags pt WHERE pt.tag_id = ?1",nativeQuery = true)
-    List<Integer> getPostIdByTagId(int tagId);
+    @Query(value = "SELECT pt.post_id FROM post_tags pt WHERE pt.tag_id IN (?1)",nativeQuery = true)
+    List<Integer> getPostIdByTagId(Integer[] tagId);
 }

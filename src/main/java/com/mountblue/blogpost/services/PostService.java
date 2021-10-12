@@ -3,6 +3,7 @@ package com.mountblue.blogpost.services;
 import com.mountblue.blogpost.model.Post;
 import org.springframework.data.domain.Page;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface PostService {
@@ -15,9 +16,11 @@ public interface PostService {
 
     void deletePostById(int id);
 
-    List<Integer> getAllPostIdByTagId(List<Integer> tagIds);
+    List<Integer> getAllPostIdByTagId(List<Integer[]> tagIds);
 
-    List<Integer> getPostIdByAuthor(List<Long> authorIds);
+    List<Integer> getPostIdByAuthor(List<Long[]> authorIds);
 
     List<Post> getAllPostsById(List<Integer> postIds);
+
+    List<Integer> getAllPostIdByPublishedAt(List<Timestamp> publishedAtList);
 }
