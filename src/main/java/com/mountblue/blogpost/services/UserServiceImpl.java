@@ -37,11 +37,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(UserRegistrationDto registrationDto) {
         User user = new User(registrationDto.getName(),
-                registrationDto.getEmail(), passwordEncoder.encode(registrationDto.getPassword()),
+                registrationDto.getEmail(), registrationDto.getPassword(),
                 List.of(new Role("ROLE_USER")));
         return userRepository.save(user);
     }
-
+//passwordEncoder.encode
     @Override
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email);

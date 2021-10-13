@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-@Controller
+@RestController
 public class CommentController {
 
     @Autowired
@@ -29,16 +29,16 @@ public class CommentController {
     @Autowired
     private UserService userService;
 
-    @ModelAttribute
-    public void modelAttribute(Model model) {
-        model.addAttribute("sessionUser", userService.findUserByEmail(SecurityContextHolder.getContext()
-                .getAuthentication().getName()));
-        model.addAttribute("admin", hasRole("ROLE_ADMIN"));
-    }
+//    @ModelAttribute
+//    public void modelAttribute(Model model) {
+//        model.addAttribute("sessionUser", userService.findUserByEmail(SecurityContextHolder.getContext()
+//                .getAuthentication().getName()));
+//        model.addAttribute("admin", hasRole("ROLE_ADMIN"));
+//    }
 
-    @PostMapping("/comment")
+    @GetMapping("/comment")
     public String saveComment(@RequestParam("comment") String data,
-                              @RequestParam("id") String postId,
+                              @RequestParam("postId") String postId,
                               @RequestParam("name") String name,
                               Model model){
         Timestamp time = Timestamp.from(Instant.now());
@@ -50,12 +50,13 @@ public class CommentController {
         comment.setName(name);
         comment.setCreatedAt(time);
         comment.setPostId(id);
-        comment.setEmail(user.getEmail());
+//        comment.setEmail(user.getEmail());
         comment.setUpdatedAt(time);
 
         commentService.saveComment(comment);
 
-        return postController.showPostByID(id, model);
+        return "Comment Saved";
+//        return postController.showPostByID(id, model);
     }
 
     @GetMapping("/deleteComment/{commentId}")
@@ -63,7 +64,8 @@ public class CommentController {
                                 @RequestParam("postId") int postId,
                                 Model model){
         this.commentService.deleteCommentByPostId(commentId);
-        return postController.showPostByID(postId, model);
+        return "Comment Deleted";
+//        return postController.showPostByID(postId, model);
     }
 
     @GetMapping("/showCommentUpdate/{commentId}")
@@ -71,10 +73,11 @@ public class CommentController {
                                     @RequestParam("postId")int postId,Model model) {
         Comment comment = commentService.getCommentById(id);
         model.addAttribute("editComment", comment);
-        return postController.showPostByID(postId, model);
+//        return postController.showPostByID(postId, model);
+        return "redirected to update div";
     }
 
-    @PostMapping("/comment/update/{commentId}")
+    @GetMapping("/comment/update/{commentId}")
     public String updatePost(@PathVariable("commentId") int id,
                              @RequestParam("comment") String comment,
                              @RequestParam("postId") int postId,
@@ -82,11 +85,12 @@ public class CommentController {
         Comment commentObj = commentService.getCommentById(id);
         commentObj.setComment(comment);
         commentService.saveComment(commentObj);
-        return postController.showPostByID(postId, model);
+//        return postController.showPostByID(postId, model);
+        return "comment updated";
     }
 
-    public static boolean hasRole(String roleName) {
-        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(roleName));
-    }
+//    public static boolean hasRole(String roleName) {
+//        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+//                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(roleName));
+//    }
 }

@@ -18,7 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.mountblue.blogpost.repositories.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Controller
+@RestController
 public class PostController {
 
     @Autowired
@@ -51,7 +51,8 @@ public class PostController {
 
     @RequestMapping("/search")
     public String showSearchResult(@RequestParam("keyword") String keyword, Model model) {
-        return showHomePage(keyword, model);
+//        return showHomePage(keyword, model);
+        return "search done";
     }
 
     @RequestMapping("/")
@@ -60,15 +61,18 @@ public class PostController {
     }
 
     @GetMapping("post/{id}")
-    public String showPostByID(@PathVariable("id") int id, Model model) {
-        Post post = postService.getPostById(id);
+    public Post showPostByID(@PathVariable("id") String id, Model model) {
+        int ids = Integer.parseInt(id);
+        Post post = postService.getPostById(ids);
         model.addAttribute("post", post);
-        List<Comment> comments = commentRepository.getCommentsByPostId(id);
+        List<Comment> comments = commentRepository.getCommentsByPostId(ids);
         model.addAttribute("comments", comments);
         User user = userServiceImpl.getCurrentUser();
         model.addAttribute("user", user);
 
-        return "post";
+        return post;
+
+//        return "post";
     }
 
     @GetMapping("/edit/{id}")
@@ -92,15 +96,17 @@ public class PostController {
         } finally {
             postService.deletePostById(id);
         }
-        return "redirect:/";
+        return "Post Deleted";
+//        return "redirect:/";
     }
 
     @GetMapping("/newPost")
     public String redirect() {
+
         return "index";
     }
 
-    @PostMapping("/save")
+    @GetMapping("/save")
     public String savePost(@RequestParam("title") String title,
                            @RequestParam("content") String content,
                            @RequestParam("tags") String tags,
@@ -113,12 +119,12 @@ public class PostController {
         post.setTitle(title);
         post.setContent(content);
         post.setCreatedAt(time);
-        post.setAuthor(user.getName());
+//        post.setAuthor(user.getName());
         post.setPublishedAt(time);
         post.setUpdatedAt(time);
         post.setExcerpt(content.substring(0));
         post.setIsPublished(true);
-        post.setAuthorId(user.getId());
+//        post.setAuthorId(user.getId());
 
         String[] tagsArray = tags.split(" ");
         List<Tag> tagList = new ArrayList<Tag>();
@@ -136,11 +142,11 @@ public class PostController {
         }
         post.setTags(tagList);
         postService.savePost(post);
-
-        return "redirect:/";
+        return "Post Saved";
+//        return "redirect:/";
     }
 
-    @PostMapping("/update/{id}")
+    @GetMapping("/update/{id}")
     public String updatePost(@RequestParam("title") String title,
                              @PathVariable("id") int id,
                              @RequestParam("content") String content,
@@ -170,7 +176,8 @@ public class PostController {
         }
         post.setTags(tagList);
         postService.savePost(post);
-        return showPostByID(id, model);
+//        return showPostByID(id, model);
+        return "Post Updated";
     }
 
     @GetMapping("/page/{pageNo}")
@@ -200,12 +207,12 @@ public class PostController {
         if (model.getAttribute("posts") == null) {
             model.addAttribute("posts", posts);
         }
-
-        return "users";
+        return "Pagination";
+//        return "users";
     }
 
     @GetMapping("/filter")
-    public String getFilteredPosts(@RequestParam(value = "authorId", required = false) Optional<Long> authorId,
+    public List<Post> getFilteredPosts(@RequestParam(value = "authorId", required = false) Optional<Long> authorId,
                                    @RequestParam(value = "tagId", required = false) Optional<Integer> tagId,
                                    String keyword, Model model) {
 
@@ -233,7 +240,8 @@ public class PostController {
             List<Post> posts = postService.getAllPostsById(postsByTagId);
             model.addAttribute("posts", posts);
         }
-        return showHomePage(keyword, model);
+        return (List<Post>) model.getAttribute("posts");
+//        return showHomePage(keyword, model);
     }
 
     public static boolean hasRole(String roleName) {
