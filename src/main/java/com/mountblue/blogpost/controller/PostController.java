@@ -207,7 +207,7 @@ public class PostController {
         if (model.getAttribute("posts") == null) {
             model.addAttribute("posts", posts);
         }
-        return "Pagination";
+        return "Pagination Done";
 //        return "users";
     }
 
