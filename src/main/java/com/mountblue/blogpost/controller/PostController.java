@@ -12,7 +12,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import com.mountblue.blogpost.model.Post;
 import com.mountblue.blogpost.model.Comment;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import com.mountblue.blogpost.repositories.CommentRepository;
@@ -56,8 +55,8 @@ public class PostController {
     }
 
     @RequestMapping("/")
-    public String showHomePage(String keyword, Model model) {
-        return showPagination(1, "title", "desc", keyword, model);
+    public List<Post> showHomePage(String keyword) {
+        return showPagination(1, "title", "desc", keyword);
     }
 
     @GetMapping("post/{id}")
@@ -181,11 +180,10 @@ public class PostController {
     }
 
     @GetMapping("/page/{pageNo}")
-    public String showPagination(@PathVariable("pageNo") int pageNo,
+    public List<Post> showPagination(@PathVariable("pageNo") int pageNo,
                                  @RequestParam(value = "sortField", defaultValue = "publishedAt") String sortField,
                                  @RequestParam(value = "sortDirection", defaultValue = "asc") String sortDirection,
-                                 String keyword,
-                                 Model model) {
+                                 String keyword) {
 
         int pageSize = 3;
         List<User> users = userService.getAllUser();
@@ -193,21 +191,7 @@ public class PostController {
         Page<Post> page = postService.findPaginated(pageNo, pageSize, sortField, sortDirection, keyword);
         List<Post> posts = page.getContent();
 
-        model.addAttribute("users", users);
-        model.addAttribute("tags", tags);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("totalPage", page.getTotalPages());
-        model.addAttribute("totalItems", page.getTotalElements());
-
-        model.addAttribute("sortField", sortField);
-        model.addAttribute("sortDirection", sortDirection);
-        model.addAttribute("reverseSortDirection", sortDirection.equals("asc") ? "desc" : "asc");
-        model.addAttribute("currentPage", pageNo);
-
-        if (model.getAttribute("posts") == null) {
-            model.addAttribute("posts", posts);
-        }
-        return "Pagination Done";
+        return posts;
 //        return "users";
     }
 
